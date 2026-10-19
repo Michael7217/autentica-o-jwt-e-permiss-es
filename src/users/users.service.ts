@@ -2,6 +2,8 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { Prisma } from '../generated/prisma/client.js';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -13,9 +15,13 @@ export class UsersService {
         email: createUserDto.email,
       },
     });
-    if (!user) throw new ConflictException('Usuario ja cadastrado');
+    if (user) throw new ConflictException('Usuario ja cadastrado');
+    const passwordhash = await bcrypt.hash(createUserDto.password, 10) //hash do password
     return await this.Prisma.users.create({
-      data: createUserDto,
+      data:{...createUserDto,
+        password: passwordhash
+      },select: {
+        id: true, name: true, email: true, password: true}
     });
   }
 
@@ -25,19 +31,24 @@ export class UsersService {
     })
   }
 
-  async update(updateUserDto: UpdateUserDto) {
+  async User(where: Prisma.usersWhereUniqueInput) {
+    return await this.Prisma.users.findUnique({
+      where: where,
+      select: {id: true, name: true, email: true, password: true}
+    })
+  }
+
+  async update(params: Prisma.usersWhereUniqueInput, updateUserDto: UpdateUserDto) {
     return await this.Prisma.users.update({
-      where: {
-        email: updateUserDto.email
-      },
+      where: params,
       data: updateUserDto
   })}
 
 
-  async remove(email: string) {
+  async remove(params: Prisma.usersWhereUniqueInput) {
     return await this.Prisma.users.delete({
       where: {
-        email: email
+        email: params.email
       }
     })
   }
