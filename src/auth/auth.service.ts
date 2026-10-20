@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto.js';
 import { UpdateAuthDto } from './dto/update-auth.dto.js';
 import { UsersService } from '../users/users.service.js';
@@ -16,10 +16,12 @@ export class AuthService {
   }
   async signIn(loginAuthDto: LoginAuthDto) {
     const user = await this.UsersService.User({email: loginAuthDto.email}); 
+    if (!user) throw new NotFoundException('usuario não cadastrado')
     const passwordmatch = await bcrypt.compare(loginAuthDto.password, user!.password)
-    if (!passwordmatch) throw new Error('Credenciais inválidas')
+    if (!passwordmatch) throw new UnauthorizedException('Credenciais inválidas')
     const payload = {
-      sub: user!.id
+      sub: user!.id,
+      role: user!.role
     }
     return {access_token: await this.Jwtservice.signAsync(payload)}
   }

@@ -5,6 +5,7 @@ import { UsersModule } from '../users/users.module.js';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from './auth.guard.js';
+import { RolesGuard } from './roles.guard.js';
 
 @Module({
   imports: [forwardRef(() => UsersModule), JwtModule.registerAsync({
@@ -16,7 +17,7 @@ import { AuthGuard } from './auth.guard.js';
     })
   })],
   controllers: [AuthController],
-  providers: [AuthService, AuthGuard],
-  exports: [AuthService, AuthGuard]
+  providers: [AuthService, AuthGuard, RolesGuard],
+  exports: [AuthService, AuthGuard, RolesGuard]
 })
 export class AuthModule {}  
