@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { AuthGuard } from '../auth/auth.guard.js';
+import { RolesGuard } from '../auth/roles.guard.js';
+import { Roles } from '../auth/roles/roles.decorator.js';
 
 @Controller('users')
 export class UsersController {
@@ -13,6 +15,8 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('USER', 'ADMIN')
   @Get()
   findAll() {
     return this.usersService.findAll();
@@ -28,9 +32,9 @@ export class UsersController {
   //   return this.usersService.update(+id, updateUserDto);
   // }
 
-  @Delete()
+  @Delete(':id')
   @UseGuards(AuthGuard)
-  remove(@Body('email') email: string) {
-    return this.usersService.remove({email});
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.remove({id});
   }
 }

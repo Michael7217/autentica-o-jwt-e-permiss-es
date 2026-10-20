@@ -18,23 +18,22 @@ export class UsersService {
     if (user) throw new ConflictException('Usuario ja cadastrado');
     const passwordhash = await bcrypt.hash(createUserDto.password, 10) //hash do password
     return await this.Prisma.users.create({
-      data:{...createUserDto,
-        password: passwordhash
+      data: {...createUserDto,
+        password: passwordhash,
       },select: {
-        id: true, name: true, email: true, password: true}
+        id: true, name: true, email: true, role: true,password: true}
     });
   }
 
   async findAll() {
     return await this.Prisma.users.findMany({
-      select: {id: true, name: true, email: true}
+      select: {id: true, name: true, email: true, role: true}
     })
   }
 
   async User(where: Prisma.usersWhereUniqueInput) {
     return await this.Prisma.users.findUnique({
-      where: where,
-      select: {id: true, name: true, email: true, password: true}
+      where: where
     })
   }
 
@@ -47,9 +46,7 @@ export class UsersService {
 
   async remove(params: Prisma.usersWhereUniqueInput) {
     return await this.Prisma.users.delete({
-      where: {
-        email: params.email
-      }
+      where: {...params}
     })
   }
 
