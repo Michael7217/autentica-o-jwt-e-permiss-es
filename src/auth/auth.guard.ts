@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
       request.user = payload;
       return true;
     }catch(error){
-      throw new Error('Token inválido')
+      throw new UnauthorizedException('Token inválido')
     }
   }
 }
