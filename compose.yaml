@@ -3,9 +3,9 @@ services:
     image: postgres:17-alpine
     # variaveis para criação do db
     environment:
-      POSTGRES_DB: api_autenticacao
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER} # acessa as variaveis do .env
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env} # o : é somente para validação
     ports:
     # conecta a porta 5433 local com a porta 5432 do container
       - "5433:5432"
@@ -29,7 +29,7 @@ services:
     build: .
     # variaveis de ambiente
     environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}@db:5432/api_autenticacao?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}@db:${POSTGRES_PORT:?defina a porta no .env}/${POSTGRES_DB}?schema=public
       SECRET_KEY: ${SECRET_KEY:?Defina SECRET_KEY no arquivo .env}
       PORT: 3000
     ports:
