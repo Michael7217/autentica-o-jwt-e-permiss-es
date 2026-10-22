@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:17-alpine
+    # variaveis para criação do db
+    environment:
+      POSTGRES_DB: api_autenticacao
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
+    ports:
+    # conecta a porta 5433 local com a porta 5432 do container
+      - "5433:5432"
+    volumes:
+    # mantém os dados do db mesmo se ele for recriado
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+    # verifica se db esta pronto para receber conexões
+      # comando executado para verificação
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      # tempo entre verificações
+      interval: 5s
+      # tempo maximo em cada requisição
+      timeout: 5s
+      # numero maximo de tentativas antes de considerar como recusado
+      retries: 10
+
+# container da api
+  api:
+    # cria a imagem da API a partir do dockerfile do diretorio atual
+    build: .
+    # variaveis de ambiente
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}@db:5432/api_autenticacao?schema=public
+      SECRET_KEY: ${SECRET_KEY:?Defina SECRET_KEY no arquivo .env}
+      PORT: 3000
+    ports:
+    # conecta a porta 3000 local com a porta 3000 do container
+      - "3000:3000"
+    depends_on:
+    # faz a API esperar o db
+      db:
+        # so inicia a API depois do healthcheck inidicar que o db esta pronto
+        condition: service_healthy
+
+volumes:
+# declara o volume nomeado usado para persistir os dados do db
+  postgres_data:
