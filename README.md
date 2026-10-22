@@ -44,6 +44,22 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## Docker
+
+Suba a API e o PostgreSQL com:
+
+```bash
+docker compose up --build
+```
+
+A API ficará disponível em `http://localhost:3000`, e o PostgreSQL em `localhost:5433` (porta do host). Antes de subir, gere uma chave JWT e adicione a linha `SECRET_KEY=<chave-gerada>` ao arquivo `.env`:
+
+```bash
+openssl rand -hex 32
+```
+
+As migrações do Prisma são aplicadas quando o container da API inicia. Para encerrar os containers, use `docker compose down`; os dados do banco permanecem no volume `postgres_data`. Para apagar também os dados, use `docker compose down -v`.
+
 ## Run tests
 
 ```bash
